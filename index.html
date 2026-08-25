@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>بين الابيض والاسود</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Vazirmatn', sans-serif;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 50%, #16213e 100%);
+        }
+        
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+        }
+        
+        .loading {
+            display: none;
+        }
+        
+        .loading.active {
+            display: inline-block;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .result-container {
+            display: none;
+        }
+        
+        .result-container.show {
+            display: block;
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        #hiddenCanvas {
+            display: none;
+        }
+        
+        .neon-glow {
+            box-shadow: 0 0 20px rgba(120, 119, 198, 0.3);
+        }
+        
+        .neon-text {
+            text-shadow: 0 0 15px rgba(120, 119, 198, 0.5);
+        }
+        
+        .cyber-button {
+            background: linear-gradient(45deg, rgba(120, 119, 198, 0.3), rgba(255, 119, 198, 0.3));
+            border: 1px solid rgba(120, 119, 198, 0.6);
+            transition: all 0.2s ease;
+        }
+        
+        .cyber-button:hover {
+            background: linear-gradient(45deg, rgba(120, 119, 198, 0.5), rgba(255, 119, 198, 0.5));
+            box-shadow: 0 0 15px rgba(120, 119, 198, 0.4);
+            transform: translateY(-1px);
+        }
+        
+        .input-glow {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.2s ease;
+        }
+        
+        .input-glow:focus {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(120, 119, 198, 0.7);
+            box-shadow: 0 0 10px rgba(120, 119, 198, 0.3);
+        }
+
+        /* ===== زر التحميل ===== */
+        .button-download {
+            line-height: 1;
+            background-color: transparent;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35em;
+            padding: 0.75em 1em;
+            padding-right: 1.25em;
+            color: #fff;
+            border: 1px solid transparent;
+            font-weight: 700;
+            border-radius: 2em;
+            font-size: 1rem;
+            box-shadow: 0 0.7em 1.5em -0.5em hsla(249, 62%, 51%, 0.745);
+            transition: transform 0.3s;
+            background: linear-gradient(90deg, rgba(77, 54, 208, 1) 0%, rgba(132, 116, 254, 1) 100%);
+        }
+
+        .button-download:hover {
+            border-color: #f4f5f2;
+        }
+
+        .button-download:active {
+            transform: scale(0.98);
+            box-shadow: 0 0.5em 1.5em -0.5em hsla(249, 62%, 51%, 0.745);
+        }
+
+        .button__icon {
+            width: 1.5em;
+            height: 1.5em;
+        }
+
+        /* ===== زر رفع الملفات ===== */
+        .button-upload {
+            --bg: linear-gradient(180deg, hsla(0, 0%, 100%, .1), hsla(0, 0%, 100%, 0)), hsl(128, 52%, 45%);
+            box-shadow: 0 1px 2px #25114f66, 0 0 0 1px hsla(128, 50%, 45%, 0.761);
+            background-color: transparent;
+            border: none;
+            line-height: 1;
+            display: inline-flex;
+            align-items: center;
+            gap: .5rem;
+            padding: .25rem .5rem;
+            padding-right: 1rem;
+            cursor: pointer;
+            font-weight: 600;
+            color: #fff;
+            background: var(--bg);
+            white-space: nowrap;
+            border-radius: 6px;
+            border: 1px solid #fff3;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .button-upload:hover {
+            transform: scale(1.02);
+            box-shadow: 0 2px 8px rgba(0, 200, 0, 0.3), 0 0 0 1px hsla(128, 50%, 45%, 0.9);
+        }
+
+        .button-upload:active {
+            transform: scale(0.97);
+        }
+
+        .btn__icon svg {
+            display: block;
+        }
+
+        /* ===== باندا ===== */
+        .panda-container {
+            position: relative;
+            width: 290px;
+            height: 250px;
+            perspective: 1000px;
+        }
+        .panda-head {
+            position: absolute;
+            width: 200px;
+            height: 180px;
+            background: white;
+            border: 4px solid #222;
+            border-radius: 50%;
+            top: 50px;
+            left: 50px;
+            z-index: 4;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1), inset 0 -5px 20px rgba(0, 0, 0, 0.05);
+        }
+        .ear {
+            position: absolute;
+            width: 70px;
+            height: 70px;
+            background: #222;
+            border: 4px solid #222;
+            border-radius: 50%;
+            z-index: 3;
+            box-shadow: inset 0 -5px 10px rgba(0, 0, 0, 0.3);
+        }
+        .ear-left {
+            top: 30px;
+            left: 40px;
+            transform: rotate(-15deg);
+            animation: ear-twitch-left 3s ease-in-out infinite;
+        }
+        .ear-right {
+            top: 30px;
+            left: 190px;
+            transform: rotate(15deg);
+            animation: ear-twitch-right 3.5s ease-in-out infinite;
+        }
+        .eye-patch {
+            position: absolute;
+            width: 60px;
+            height: 70px;
+            background: #222;
+            border-radius: 50%;
+            z-index: 5;
+        }
+        .eye-patch-left { top: 60px; left: 30px; }
+        .eye-patch-right { top: 60px; left: 110px; }
+        .eye {
+            position: absolute;
+            width: 25px;
+            height: 30px;
+            background: white;
+            border-radius: 50%;
+            z-index: 6;
+            animation: blink 4s linear infinite;
+        }
+        .eye-left { top: 75px; left: 45px; }
+        .eye-right { top: 75px; left: 125px; }
+        .pupil {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: #222;
+            border-radius: 50%;
+            z-index: 7;
+            animation: look-around 8s ease-in-out infinite;
+        }
+        .pupil-left { top: 82px; left: 53px; }
+        .pupil-right { top: 82px; left: 133px; }
+        .nose {
+            position: absolute;
+            width: 30px;
+            height: 25px;
+            background: #222;
+            border-radius: 50%;
+            top: 110px;
+            left: 85px;
+            z-index: 8;
+            box-shadow: inset 0 -3px 5px rgba(0, 0, 0, 0.3);
+        }
+        .mouth {
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-top: 12px solid #222;
+            border-radius: 50%;
+            top: 135px;
+            left: 92px;
+            z-index: 7;
+            transform: rotate(180deg);
+            animation: smile 5s ease-in-out infinite;
+        }
+        @keyframes blink {
+            0%,45%,55%,100% { height: 30px; }
+            48%,52% { height: 5px; }
+        }
+        @keyframes look-around {
+            0%,100% { transform: translate(0,0); }
+            25% { transform: translate(3px,3px); }
+            50% { transform: translate(0,-3px); }
+            75% { transform: translate(-3px,2px); }
+        }
+        @keyframes smile {
+            0%,100% { transform: rotate(180deg) scale(1); }
+            50% { transform: rotate(180deg) scale(1.2); }
+        }
+        @keyframes ear-twitch-left {
+            0%,100% { transform: rotate(-15deg); }
+            50% { transform: rotate(-25deg); }
+        }
+        @keyframes ear-twitch-right {
+            0%,100% { transform: rotate(15deg); }
+            50% { transform: rotate(25deg); }
+        }
+
+        /* ===== أزرار التواصل الاجتماعي ===== */
+        .social-login-icons {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            -webkit-box-reflect: below 5px linear-gradient(transparent, #00000055);
+        }
+        .social-login-icons svg {
+            width: 40px;
+        }
+        .social-icon-1,
+        .social-icon-1-1,
+        .social-icon-2,
+        .social-icon-2-2,
+        .social-icon-3,
+        .social-icon-3-3,
+        .social-icon-4,
+        .social-icon-4-4 {
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50px;
+            margin: 20px 0 0px 0;
+        }
+        .icon svg { fill: #111; }
+        .socialcontainer {
+            height: 80px;
+            overflow: hidden;
+        }
+        .social-icon-1 {
+            transition-duration: 0.4s;
+            background-color: rgb(0, 0, 0);
+            transition-timing-function: cubic-bezier(0.46, -0.78, 0.5, 1.56);
+        }
+        .social-icon-1 svg,
+        .social-icon-2 svg,
+        .social-icon-3 svg,
+        .social-icon-4 svg {
+            opacity: 0;
+            transition-duration: 0.5s;
+            transition-delay: 0.2s;
+        }
+        .social-icon-1-1 {
+            transition-duration: 0.4s;
+            background-color: rgb(0, 0, 0, 0);
+        }
+        .socialcontainer:hover .social-icon-1 {
+            transform: translateY(-70px);
+        }
+        .socialcontainer:hover .social-icon-1 svg,
+        .socialcontainer:hover .social-icon-2 svg,
+        .socialcontainer:hover .social-icon-3 svg,
+        .socialcontainer:hover .social-icon-4 svg {
+            opacity: 1;
+        }
+        .social-icon-2 {
+            transition-duration: 0.4s;
+            transition-timing-function: cubic-bezier(0.46, -0.78, 0.5, 1.56);
+            background: linear-gradient(72.44deg, #ff7a00 11.92%, #ff0169 51.56%, #d300c5 85.69%);
+        }
+        .socialcontainer:hover .social-icon-2 { transform: translateY(-70px); }
+        .social-icon-3 {
+            transition-duration: 0.4s;
+            transition-timing-function: cubic-bezier(0.46, -0.78, 0.5, 1.56);
+            background: #316ff6;
+        }
+        .socialcontainer:hover .social-icon-3 { transform: translateY(-70px); }
+        .social-icon-4 {
+            transition-duration: 0.4s;
+            transition-timing-function: cubic-bezier(0.46, -0.78, 0.5, 1.56);
+            background: linear-gradient(180deg, rgba(129,34,144,1) 0%, rgba(77,34,124,1) 91%);
+        }
+        .socialcontainer:hover .social-icon-4 { transform: translateY(-70px); }
+
+        /* ===== تحسينات الشاشات الصغيرة ===== */
+        @media (max-width: 640px) {
+            .container { padding-left: 12px; padding-right: 12px; }
+            .glass-effect { padding: 20px 16px !important; }
+            .grid.md\:grid-cols-2 { grid-template-columns: 1fr !important; gap: 24px !important; }
+            .text-4xl { font-size: 2rem !important; }
+            .text-5xl { font-size: 2.2rem !important; }
+            .flex-col.md\:flex-row { flex-direction: column !important; }
+            button.cyber-button { width: 100%; justify-content: center; }
+            .glass-card.rounded-xl.p-6 { padding: 16px !important; }
+            .min-h-\[300px\] { min-height: 200px !important; }
+            .max-h-\[400px\] { max-height: 250px !important; }
+            .button-download { font-size: 0.9rem; padding: 0.6em 0.9em; }
+            .panda-container { transform: scale(0.6); transform-origin: center; }
+            .social-login-icons { gap: 4px; }
+            .socialcontainer { height: 60px; }
+            .social-icon-1, .social-icon-1-1, .social-icon-2, .social-icon-2-2,
+            .social-icon-3, .social-icon-3-3, .social-icon-4, .social-icon-4-4 {
+                width: 40px; height: 40px; margin: 10px 0 0 0;
+            }
+            .social-login-icons svg { width: 32px; }
+        }
+        @media (max-width: 400px) {
+            .text-4xl { font-size: 1.6rem !important; }
+            .text-lg { font-size: 1rem !important; }
+            .px-6 { padding-left: 14px !important; padding-right: 14px !important; }
+            .py-4 { padding-top: 12px !important; padding-bottom: 12px !important; }
+            .panda-container { transform: scale(0.45); transform-origin: center; }
+        }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen">
+    <div class="container mx-auto px-4 py-6 md:py-8">
+
+        <!-- ===== العنوان ===== -->
+        <div class="text-center mb-6">
+            <h1 class="text-3xl md:text-5xl font-bold text-white mb-3 neon-text">
+                🎨 بين الابيض والاسود
+            </h1>
+            <p class="text-base md:text-xl text-white/80 max-w-2xl mx-auto">
+                حوّل صورك الملونة إلى أبيض وأسود بسهولة
+            </p>
+        </div>
+
+        <!-- ===== شريط المقارنة قبل/بعد ===== -->
+        <div class="max-w-2xl mx-auto mb-10">
+            <div class="glass-card rounded-2xl p-4 md:p-6">
+                <h2 class="text-white text-center text-lg md:text-xl font-semibold mb-4">🔄 قبل وبعد</h2>
+                <div class="relative w-full max-w-xl mx-auto overflow-hidden rounded-xl" style="aspect-ratio: 16/9; background: #1a1a2e;">
+                    <img id="afterImage" src="https://i.postimg.cc/dVjv6H5x/grayscale-image-8.jpg" alt="After" class="absolute inset-0 w-full h-full object-cover">
+                    <div id="beforeContainer" class="absolute inset-0 w-full h-full overflow-hidden" style="clip-path: inset(0 50% 0 0);">
+                        <img id="beforeImage" src="https://i.postimg.cc/ZqHgBXwS/20260825-082710.jpg" alt="Before" class="absolute inset-0 w-full h-full object-cover" style="clip-path: inset(0 50% 0 0);">
+                    </div>
+                    <div id="sliderLine" class="absolute top-0 bottom-0 w-1 bg-white/80 shadow-lg" style="left: 50%;">
+                        <div id="sliderHandle" class="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-10 h-10 rounded-full bg-white/90 shadow-xl flex items-center justify-center cursor-grab active:cursor-grabbing transition-transform hover:scale-110">
+                            <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 7l-4 5 4 5m8-10l4 5-4 5"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex justify-between text-white/60 text-xs md:text-sm mt-2 px-2">
+                    <span>✨ قبل</span>
+                    <span>⚫ بعد</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== البطاقة الرئيسية ===== -->
+        <div class="max-w-4xl mx-auto glass-effect rounded-2xl p-6 md:p-8 shadow-2xl">
+
+            <!-- حقل الرابط وزر التحويل -->
+            <div class="mb-8">
+                <label for="imageUrl" class="block text-white text-base md:text-lg font-semibold mb-4">🔗 أدخل رابط الصورة:</label>
+                <div class="flex flex-col md:flex-row gap-4">
+                    <input type="url" id="imageUrl" placeholder="https://example.com/image.jpg"
+                           class="flex-1 px-5 py-3 md:px-6 md:py-4 rounded-xl input-glow text-white placeholder-white/60 focus:outline-none transition-all duration-300 text-sm md:text-base">
+                    <button onclick="convertImage()"
+                            class="px-6 py-3 md:px-8 md:py-4 cyber-button text-white font-semibold rounded-xl transform hover:scale-105 text-sm md:text-base">
+                        <span class="loading">⏳</span>
+                        <span class="button-text">تحويل</span>
+                    </button>
+                </div>
+                <p class="text-white/60 text-xs md:text-sm mt-2">التنسيقات المدعومة: JPG، JPEG، PNG</p>
+
+                <!-- رفع ملف -->
+                <div class="mt-6 p-5 md:p-6 glass-card rounded-xl">
+                    <p class="text-white/90 text-sm md:text-base mb-3 font-medium">📁 أو اختر صورة من جهازك:</p>
+                    <button id="uploadButton" class="button-upload" type="button">
+                        <span class="btn__icon">
+                            <svg stroke-linejoin="round" stroke-linecap="round" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" height="24" width="24" xmlns="http://www.w3.org/2000/svg">
+                                <path fill="none" d="M0 0h24v24H0z" stroke="none"></path>
+                                <path d="M7 18a4.6 4.4 0 0 1 0 -9a5 4.5 0 0 1 11 2h1a3.5 3.5 0 0 1 0 7h-1"></path>
+                                <path d="M9 15l3 -3l3 3"></path>
+                                <path d="M12 12l0 9"></path>
+                            </svg>
+                        </span>
+                        <span class="btn__text">رفع صورة</span>
+                    </button>
+                    <input type="file" id="fileInput" accept="image/*" class="hidden" onchange="handleFileSelect(event)">
+                </div>
+            </div>
+
+            <!-- نتائج التحويل -->
+            <div id="resultContainer" class="result-container">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+                    <div class="text-center">
+                        <h3 class="text-white text-lg md:text-xl font-semibold mb-4">🖼️ الصورة الأصلية</h3>
+                        <div class="glass-card rounded-xl p-3 md:p-4 min-h-[200px] md:min-h-[300px] flex items-center justify-center">
+                            <img id="originalImage" src="" alt="الصورة الأصلية" class="max-w-full max-h-[250px] md:max-h-[400px] rounded-lg shadow-lg">
+                        </div>
+                    </div>
+                    <div class="text-center">
+                        <h3 class="text-white text-lg md:text-xl font-semibold mb-4">⚫ صورة بالأبيض والأسود</h3>
+                        <div class="glass-card rounded-xl p-3 md:p-4 min-h-[200px] md:min-h-[300px] flex items-center justify-center">
+                            <img id="grayscaleImage" src="" alt="صورة بالأبيض والأسود" class="max-w-full max-h-[250px] md:max-h-[400px] rounded-lg shadow-lg">
+                        </div>
+                        <button onclick="downloadImage()" class="button-download mt-4">
+                            <svg stroke-linejoin="round" stroke-linecap="round" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" height="40" width="40" class="button__icon" xmlns="http://www.w3.org/2000/svg">
+                                <path fill="none" d="M0 0h24v24H0z" stroke="none"></path>
+                                <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2"></path>
+                                <path d="M7 11l5 5l5 -5"></path>
+                                <path d="M12 4l0 12"></path>
+                            </svg>
+                            <span class="button__text">تحميل</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- رسالة الخطأ -->
+            <div id="errorMessage" class="hidden mt-6 p-4 bg-red-500/20 border border-red-500/50 rounded-xl text-red-200 text-center text-sm md:text-base">
+                <span id="errorText"></span>
+            </div>
+        </div>
+
+        <!-- ===== أزرار التواصل الاجتماعي ===== -->
+        <div class="max-w-4xl mx-auto mt-12 flex justify-center">
+            <div class="social-login-icons">
+                <!-- فيسبوك -->
+                <a href="https://www.facebook.com/a.woode.249" target="_blank" class="socialcontainer">
+                    <div class="icon social-icon-1-1">
+                        <svg viewBox="0 0 320 512" height="1.7em" fill="white" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M80 299.3V512H196V299.3h86.5l18-97.8H196V166.9c0-51.7 20.3-71.5 72.7-71.5c16.3 0 29.4 .4 37 1.2V7.9C291.4 4 256.4 0 236.2 0C129.3 0 80 50.5 80 159.4v42.1H14v97.8H80z"/>
+                        </svg>
+                    </div>
+                    <div class="social-icon-1">
+                        <svg viewBox="0 0 320 512" height="1.7em" fill="white" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M80 299.3V512H196V299.3h86.5l18-97.8H196V166.9c0-51.7 20.3-71.5 72.7-71.5c16.3 0 29.4 .4 37 1.2V7.9C291.4 4 256.4 0 236.2 0C129.3 0 80 50.5 80 159.4v42.1H14v97.8H80z"/>
+                        </svg>
+                    </div>
+                </a>
+
+                <!-- إنستغرام -->
+                <a href="https://www.instagram.com/a.woode.249" target="_blank" class="socialcontainer">
+                    <div class="icon social-icon-2-2">
+                        <svg fill="white" class="svgIcon" viewBox="0 0 448 512" height="1.5em" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M224.1 141c-63.6 0-114.9 51.3-114.9 114.9s51.3 114.9 114.9 114.9S339 319.5 339 255.9 287.7 141 224.1 141zm0 189.6c-41.1 0-74.7-33.5-74.7-74.7s33.5-74.7 74.7-74.7 74.7 33.5 74.7 74.7-33.6 74.7-74.7 74.7zm146.4-194.3c0 14.9-12 26.8-26.8 26.8-14.9 0-26.8-12-26.8-26.8s12-26.8 26.8-26.8 26.8 12 26.8 26.8zm76.1 27.2c-1.7-35.9-9.9-67.7-36.2-93.9-26.2-26.2-58-34.4-93.9-36.2-37-2.1-147.9-2.1-184.9 0-35.8 1.7-67.6 9.9-93.9 36.1s-34.4 58-36.2 93.9c-2.1 37-2.1 147.9 0 184.9 1.7 35.9 9.9 67.7 36.2 93.9s58 34.4 93.9 36.2c37 2.1 147.9 2.1 184.9 0 35.9-1.7 67.7-9.9 93.9-36.2 26.2-26.2 34.4-58 36.2-93.9 2.1-37 2.1-147.8 0-184.8zM398.8 388c-7.8 19.6-22.9 34.7-42.6 42.6-29.5 11.7-99.5 9-132.1 9s-102.7 2.6-132.1-9c-19.6-7.8-34.7-22.9-42.6-42.6-11.7-29.5-9-99.5-9-132.1s-2.6-102.7 9-132.1c7.8-19.6 22.9-34.7 42.6-42.6 29.5-11.7 99.5-9 132.1-9s102.7-2.6 132.1 9c19.6 7.8 34.7 22.9 42.6 42.6 11.7 29.5 9 99.5 9 132.1s2.7 102.7-9 132.1z"/>
+                        </svg>
+                    </div>
+                    <div class="social-icon-2">
+                        <svg fill="white" class="svgIcon" viewBox="0 0 448 512" height="1.5em" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M224.1 141c-63.6 0-114.9 51.3-114.9 114.9s51.3 114.9 114.9 114.9S339 319.5 339 255.9 287.7 141 224.1 141zm0 189.6c-41.1 0-74.7-33.5-74.7-74.7s33.5-74.7 74.7-74.7 74.7 33.5 74.7 74.7-33.6 74.7-74.7 74.7zm146.4-194.3c0 14.9-12 26.8-26.8 26.8-14.9 0-26.8-12-26.8-26.8s12-26.8 26.8-26.8 26.8 12 26.8 26.8zm76.1 27.2c-1.7-35.9-9.9-67.7-36.2-93.9-26.2-26.2-58-34.4-93.9-36.2-37-2.1-147.9-2.1-184.9 0-35.8 1.7-67.6 9.9-93.9 36.1s-34.4 58-36.2 93.9c-2.1 37-2.1 147.9 0 184.9 1.7 35.9 9.9 67.7 36.2 93.9s58 34.4 93.9 36.2c37 2.1 147.9 2.1 184.9 0 35.9-1.7 67.7-9.9 93.9-36.2 26.2-26.2 34.4-58 36.2-93.9 2.1-37 2.1-147.8 0-184.8zM398.8 388c-7.8 19.6-22.9 34.7-42.6 42.6-29.5 11.7-99.5 9-132.1 9s-102.7 2.6-132.1-9c-19.6-7.8-34.7-22.9-42.6-42.6-11.7-29.5-9-99.5-9-132.1s-2.6-102.7 9-132.1c7.8-19.6 22.9-34.7 42.6-42.6 29.5-11.7 99.5-9 132.1-9s102.7-2.6 132.1 9c19.6 7.8 34.7 22.9 42.6 42.6 11.7 29.5 9 99.5 9 132.1s2.7 102.7-9 132.1z"/>
+                        </svg>
+                    </div>
+                </a>
+
+                <!-- جيثب -->
+                <a href="https://github.com/Woode-249" target="_blank" class="socialcontainer">
+                    <div class="icon social-icon-3-3">
+                        <svg viewBox="0 0 496 512" fill="white" height="1.6em" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/>
+                        </svg>
+                    </div>
+                    <div class="social-icon-3">
+                        <svg viewBox="0 0 496 512" fill="white" height="1.6em" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/>
+                        </svg>
+                    </div>
+                </a>
+
+                <!-- تلغرام -->
+                <a href="https://t.me/c249c" target="_blank" class="socialcontainer">
+                    <div class="icon social-icon-4-4">
+                        <svg viewBox="0 0 496 512" fill="white" height="1.6em" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M248,8C111.033,8,0,119.033,0,256S111.033,504,248,504,496,392.967,496,256,384.967,8,248,8ZM362.466,179.1c-7.84,36.064-41.576,154.48-58.693,205.2-7.264,21.488-21.6,28.8-35.6,28.8-18.032,0-31.792-11.632-49.264-22.784-19.936-12.752-31.2-20.704-50.576-33.152-22.368-14.4-7.872-22.272,4.832-35.2,3.296-3.36,60.464-55.456,61.6-60.768.144-.672.288-1.216.144-1.728-.576-2.016-2.176-2.912-3.52-3.152-2.144-.288-5.056-.576-9.92-.576-4.8,0-9.984.576-14.752,2.144-5.728,1.888-52.672,32.352-59.84,38.112-7.968,6.4-14.112,9.888-26.976,9.888-12.192,0-24.576-2.88-36.96-7.36-15.136-5.472-27.52-8.448-27.52-18.208,0-6.4,3.2-12.288,8.448-15.488,45.216-24.176,124.416-49.28,188.896-58.864,39.68-5.888,82.144,0,103.936,4.672,25.92,5.536,36.832,20.832,33.6,42.752Z"/>
+                        </svg>
+                    </div>
+                    <div class="social-icon-4">
+                        <svg viewBox="0 0 496 512" fill="white" height="1.6em" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M248,8C111.033,8,0,119.033,0,256S111.033,504,248,504,496,392.967,496,256,384.967,8,248,8ZM362.466,179.1c-7.84,36.064-41.576,154.48-58.693,205.2-7.264,21.488-21.6,28.8-35.6,28.8-18.032,0-31.792-11.632-49.264-22.784-19.936-12.752-31.2-20.704-50.576-33.152-22.368-14.4-7.872-22.272,4.832-35.2,3.296-3.36,60.464-55.456,61.6-60.768.144-.672.288-1.216.144-1.728-.576-2.016-2.176-2.912-3.52-3.152-2.144-.288-5.056-.576-9.92-.576-4.8,0-9.984.576-14.752,2.144-5.728,1.888-52.672,32.352-59.84,38.112-7.968,6.4-14.112,9.888-26.976,9.888-12.192,0-24.576-2.88-36.96-7.36-15.136-5.472-27.52-8.448-27.52-18.208,0-6.4,3.2-12.288,8.448-15.488,45.216-24.176,124.416-49.28,188.896-58.864,39.68-5.888,82.144,0,103.936,4.672,25.92,5.536,36.832,20.832,33.6,42.752Z"/>
+                        </svg>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <!-- ===== وجه الباندا ===== -->
+        <div class="max-w-4xl mx-auto mt-12 flex justify-center">
+            <div class="panda-container">
+                <div class="ear ear-left"></div>
+                <div class="ear ear-right"></div>
+                <div class="panda-head">
+                    <div class="eye-patch eye-patch-left"></div>
+                    <div class="eye-patch eye-patch-right"></div>
+                    <div class="eye eye-left"></div>
+                    <div class="eye eye-right"></div>
+                    <div class="pupil pupil-left"></div>
+                    <div class="pupil pupil-right"></div>
+                    <div class="nose"></div>
+                    <div class="mouth"></div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Hidden Canvas -->
+    <canvas id="hiddenCanvas"></canvas>
+
+    <!-- ===== JavaScript ===== -->
+    <script>
+        // --- وظائف التحويل ---
+        function showLoading(show) {
+            const loading = document.querySelector('.loading');
+            const buttonText = document.querySelector('.button-text');
+            if (show) {
+                loading.classList.add('active');
+                buttonText.textContent = 'جاري...';
+            } else {
+                loading.classList.remove('active');
+                buttonText.textContent = 'تحويل';
+            }
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            const errorText = document.getElementById('errorText');
+            errorText.textContent = message;
+            errorDiv.classList.remove('hidden');
+            setTimeout(() => { errorDiv.classList.add('hidden'); }, 5000);
+        }
+
+        function isValidImageUrl(url) {
+            try { new URL(url); return true; } catch { return false; }
+        }
+
+        function convertToGrayscale(img) {
+            const canvas = document.getElementById('hiddenCanvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = img.naturalWidth || img.width;
+            canvas.height = img.naturalHeight || img.height;
+            ctx.drawImage(img, 0, 0);
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const data = imageData.data;
+            for (let i = 0; i < data.length; i += 4) {
+                const gray = Math.round(0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2]);
+                data[i] = gray; data[i+1] = gray; data[i+2] = gray;
+            }
+            ctx.putImageData(imageData, 0, 0);
+            return canvas.toDataURL('image/jpeg', 0.9);
+        }
+
+        async function convertImage() {
+            const imageUrl = document.getElementById('imageUrl').value.trim();
+            if (!imageUrl) { showError('يرجى إدخال رابط الصورة أو تحديد ملف.'); return; }
+            if (!isValidImageUrl(imageUrl)) { showError('يرجى إدخال رابط صحيح.'); return; }
+            showLoading(true);
+            const proxyServices = [
+                '',
+                'https://cors-anywhere.herokuapp.com/',
+                'https://api.allorigins.win/raw?url=',
+                'https://corsproxy.io/?'
+            ];
+            let success = false;
+            for (let i = 0; i < proxyServices.length && !success; i++) {
+                try {
+                    const proxyUrl = proxyServices[i] + (i === 0 ? imageUrl : encodeURIComponent(imageUrl));
+                    await new Promise((resolve, reject) => {
+                        const img = new Image();
+                        img.crossOrigin = 'anonymous';
+                        img.onload = function() {
+                            try {
+                                document.getElementById('originalImage').src = imageUrl;
+                                document.getElementById('grayscaleImage').src = convertToGrayscale(img);
+                                document.getElementById('resultContainer').classList.add('show');
+                                showLoading(false);
+                                success = true;
+                                resolve();
+                            } catch (e) { reject(e); }
+                        };
+                        img.onerror = () => reject(new Error('Image load failed'));
+                        setTimeout(() => { if (!success) reject(new Error('Timeout')); }, 10000);
+                        img.src = proxyUrl;
+                    });
+                } catch (e) { continue; }
+            }
+            if (!success) {
+                showError('تعذر تحميل الصورة. يرجى اختيار صورة محلية أو تجربة رابط آخر.');
+                showLoading(false);
+            }
+        }
+
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            if (!file.type.startsWith('image/')) { showError('يرجى اختيار ملفات الصور فقط.'); return; }
+            showLoading(true);
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    try {
+                        document.getElementById('originalImage').src = e.target.result;
+                        document.getElementById('grayscaleImage').src = convertToGrayscale(img);
+                        document.getElementById('resultContainer').classList.add('show');
+                        showLoading(false);
+                        document.getElementById('imageUrl').value = '';
+                    } catch (err) { showError('خطأ في تحويل الصورة'); showLoading(false); }
+                };
+                img.src = e.target.result;
+            };
+            reader.onerror = () => { showError('خطأ في قراءة الملف'); showLoading(false); };
+            reader.readAsDataURL(file);
+        }
+
+        function downloadImage() {
+            const img = document.getElementById('grayscaleImage');
+            const link = document.createElement('a');
+            link.href = img.src;
+            link.download = 'grayscale-image.jpg';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // --- ربط زر الرفع ---
+        document.getElementById('uploadButton').addEventListener('click', function() {
+            document.getElementById('fileInput').click();
+        });
+
+        // --- شريط المقارنة ---
+        (function() {
+            const container = document.querySelector('.relative.overflow-hidden');
+            const beforeContainer = document.getElementById('beforeContainer');
+            const sliderLine = document.getElementById('sliderLine');
+            let isDragging = false;
+
+            function updateSlider(clientX) {
+                const rect = container.getBoundingClientRect();
+                let x = (clientX - rect.left) / rect.width;
+                x = Math.max(0, Math.min(1, x));
+                const percent = x * 100;
+                beforeContainer.style.clipPath = `inset(0 ${100 - percent}% 0 0)`;
+                sliderLine.style.left = `${percent}%`;
+            }
+
+            // Mouse
+            const handle = document.getElementById('sliderHandle');
+            handle.addEventListener('mousedown', (e) => { isDragging = true; e.preventDefault(); });
+            document.addEventListener('mousemove', (e) => { if (!isDragging) return; updateSlider(e.clientX); });
+            document.addEventListener('mouseup', () => { isDragging = false; });
+
+            // Touch
+            handle.addEventListener('touchstart', (e) => { isDragging = true; e.preventDefault(); }, { passive: false });
+            document.addEventListener('touchmove', (e) => {
+                if (!isDragging) return;
+                const touch = e.touches[0];
+                updateSlider(touch.clientX);
+            }, { passive: false });
+            document.addEventListener('touchend', () => { isDragging = false; });
+
+            // Click on container
+            container.addEventListener('click', (e) => {
+                if (e.target === handle || e.target.closest('#sliderHandle')) return;
+                updateSlider(e.clientX);
+            });
+        })();
+
+        // Enter key
+        document.getElementById('imageUrl').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') convertImage();
+        });
+    </script>
+</body>
+</html>
